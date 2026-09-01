@@ -250,4 +250,11 @@ SECTIONS
     libgcc.a:* ( * )
   }
 
+  .dma_buffer (NOLOAD) :
+  {
+    . = ALIGN(32);
+    *(.dma_buffer)
+    . = ALIGN(32);
+  } >RAM_D2
+
 }

@@ -19,6 +19,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "stm32h750b_discovery_ts.h"
+#include "stm32h750xx.h"
 #include "stm32h7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -199,5 +201,13 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /* USER CODE BEGIN 1 */
+void EXTI2_IRQHandler () {
+
+    BSP_TS_IRQHandler(0);
+}
+
+void BSP_TS_Callback(uint32_t Instance) {
+
+}
 
 /* USER CODE END 1 */

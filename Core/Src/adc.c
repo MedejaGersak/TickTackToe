@@ -1,13 +1,16 @@
 #include "main.h"
 #include "adc.h"
 #include "stm32h7xx_hal.h"
+#include "stm32h7xx_hal_gpio.h"
 
 ADC_HandleTypeDef hadc3 = {0};
 DMA_HandleTypeDef hdma1 = {0};
 GPIO_InitTypeDef pc0X = {0};
 GPIO_InitTypeDef pf8Y = {0};
+GPIO_InitTypeDef pg3Button = {0};
 
 
+__attribute__((section(".dma_buffer"), aligned(32)))
 volatile uint16_t joystick_buffer[2];
 
 
@@ -17,7 +20,7 @@ void MG_adc_Init(void){
 
     hadc3.Instance = ADC3;
 
-    hadc3.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV1;
+    hadc3.Init.ClockPrescaler = ADC_CLOCKPRESCALER_PCLK_DIV4;
     hadc3.Init.Resolution = ADC_RESOLUTION_16B;
     hadc3.Init.ContinuousConvMode = ENABLE;
     hadc3.Init.ScanConvMode = ADC_SCAN_ENABLE;
@@ -92,6 +95,8 @@ void MG_adc_Init(void){
    //TODO init PC0 PF8
    __HAL_RCC_GPIOC_CLK_ENABLE();
    __HAL_RCC_GPIOF_CLK_ENABLE();
+   __HAL_RCC_GPIOG_CLK_ENABLE();
+
 
    pc0X.Pin = GPIO_PIN_0;
    pc0X.Mode = GPIO_MODE_ANALOG;
@@ -106,5 +111,12 @@ void MG_adc_Init(void){
    pf8Y.Speed = GPIO_SPEED_FREQ_LOW;
 
    HAL_GPIO_Init(GPIOF, &pf8Y);
+
+   pg3Button.Pin = GPIO_PIN_3;
+   pg3Button.Mode = GPIO_MODE_INPUT;
+   pg3Button.Pull = GPIO_PULLUP;
+   pg3Button.Speed = GPIO_SPEED_FREQ_LOW;
+
+   HAL_GPIO_Init(GPIOG, &pg3Button);
 
 }

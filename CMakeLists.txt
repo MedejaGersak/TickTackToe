@@ -30,6 +30,7 @@ add_subdirectory(cmake/stm32cubemx)
 set(APP_SOURCES
     Core/Src/main.c
     Core/Src/adc.c
+    Core/Src/display.c
     # All user created source files
 )
 
@@ -57,6 +58,8 @@ set(BSP_SOURCES
     Drivers/BSP/Components/mt48lc4m32b2/mt48lc4m32b2.c
     Drivers/BSP/STM32H750B-DK/stm32h750b_discovery_bus.c
     Drivers/BSP/STM32H750B-DK/stm32h750b_discovery_sdram.c
+    Drivers/BSP/STM32H750B-DK/stm32h750b_discovery_ts.c
+
 
     # add FT5336 implementation
     Drivers/BSP/Components/ft5336/ft5336.c
@@ -82,6 +85,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     Drivers/BSP/STM32H750B-DK
     Drivers/BSP/Components/Common
     Utilities/LCD/Inc
+    Utilities/Fonts/Inc
     Drivers/STM32H7xx_HAL_Driver/Inc
     # All include files added into project folder after initial CubeMX init
 )

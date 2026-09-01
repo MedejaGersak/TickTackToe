@@ -26,11 +26,13 @@
 #include "stm32h750b_discovery_sdram.h"
 #include "stm32h750b_discovery_ts.h"
 #include "stm32h7xx.h"
+#include "stm32h7xx_hal_gpio.h"
 #include "stm32h7xx_hal_ltdc.h"
 #include "stm32h7xx_hal_tim.h"
 #include <stdint.h>
 
 #include "adc.h"
+#include "display.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -73,7 +75,6 @@
 void SystemClock_Config(void);
 static void MPU_Config(void);
 /* USER CODE BEGIN PFP */
-void MK_Display_Init(void);
 
 
 /* USER CODE END PFP */
@@ -87,6 +88,8 @@ void MK_Display_Init(void);
  * @brief  The application entry point.
  * @retval int
  */
+int button;
+
 int main(void) {
 
   /* USER CODE BEGIN 1 */
@@ -111,37 +114,46 @@ int main(void) {
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-  //MG_adc_Init();
-  MK_Display_Init();
+  MG_adc_Init();
+  MG_Display_Init();
 
   HAL_Delay(100);
   /* USER CODE BEGIN 2 */
 
-  // if(HAL_ADCEx_Calibration_Start(&hadc3,ADC_CALIB_OFFSET, ADC_SINGLE_ENDED) != HAL_OK){
-  //   Error_Handler();
-  // }
 
+  if(HAL_ADCEx_Calibration_Start(&hadc3,ADC_CALIB_OFFSET, ADC_SINGLE_ENDED) != HAL_OK){
+    Error_Handler();
+  }
 
-  // if(HAL_ADC_Start_DMA(&hadc3, (uint32_t*) joystick_buffer, 2) != HAL_OK){
-  //   Error_Handler();
-  // }
+  if(HAL_ADC_Start_DMA(&hadc3, (uint32_t*) joystick_buffer, 2) != HAL_OK){
+    Error_Handler();
+  }
 
   /* USER CODE END 2 */
   int temp = 0;
   uint16_t x = 0,y = 0;
+  
+  MG_Backround_Start();
+
+  MG_Backround_Play();
+  
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
     /* USER CODE END WHILE */
 
+    if(HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_3) == GPIO_PIN_SET){
+      button = 1;
+    }else button = 0;
+    
     x = joystick_buffer[0];
     y = joystick_buffer[1];
-    uint16_t temp2 = x + y;
+    uint16_t temp2 = x + y + button;
 
     /* USER CODE BEGIN 3 */
     if(temp > 100) temp = MIN(temp2, temp);
-    BSP_LCD_DrawHLine(0, 10, 10, temp, LCD_COLOR_ARGB8888_DARKGREEN);
+    
     temp++;
     HAL_Delay(500);
     /* USER CODE END 3 */
@@ -205,36 +217,7 @@ void SystemClock_Config(void) {
 
 /* USER CODE BEGIN 4 */
 void MK_Display_Init(void) {
-  if (BSP_SDRAM_Init(0) != BSP_ERROR_NONE) {
-    Error_Handler();
-  }
-
-  if (BSP_LCD_Init(0, LCD_ORIENTATION_LANDSCAPE) != BSP_ERROR_NONE) {
-    Error_Handler();
-  }
-
-  // Start with layer 0 pointing to first framebuffer
-  if (BSP_LCD_SetLayerAddress(0, 0, LCD_FRAME_BUFFER_LAYER0) != BSP_ERROR_NONE) {
-    Error_Handler();
-  }
-
-  if (BSP_LCD_SetLayerVisible(0, 0, ENABLE) != BSP_ERROR_NONE) {
-    Error_Handler();
-  }
-
-  if (BSP_LCD_SetTransparency(0, 0, 255) != BSP_ERROR_NONE) {
-    Error_Handler();
-  }
-
-  if (BSP_LCD_SetActiveLayer(0, 0) != BSP_ERROR_NONE) {
-    Error_Handler();
-  }
-
-  UTIL_LCD_SetFuncDriver(&LCD_Driver);
-
-  if (BSP_LCD_DisplayOn(0) != BSP_ERROR_NONE) {
-    Error_Handler();
-  }
+  
 }
 
 
