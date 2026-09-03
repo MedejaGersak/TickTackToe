@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "joystick.h"
 #include "stm32h7xx_hal.h"
 #include "gpio.h"
 #include "stm32_lcd.h"
@@ -33,6 +34,7 @@
 
 #include "adc.h"
 #include "display.h"
+#include "game.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -81,6 +83,16 @@ static void MPU_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+//----------------
+int button;
+int temp = 0;
+//-----------------
+
+enum Screen {
+  HOMESCREEN,
+  PLAYSCREEN
+};
+
 
 /* USER CODE END 0 */
 
@@ -88,7 +100,7 @@ static void MPU_Config(void);
  * @brief  The application entry point.
  * @retval int
  */
-int button;
+
 
 int main(void) {
 
@@ -117,7 +129,7 @@ int main(void) {
   MG_adc_Init();
   MG_Display_Init();
 
-  HAL_Delay(100);
+  HAL_Delay(300);
   /* USER CODE BEGIN 2 */
 
 
@@ -130,12 +142,16 @@ int main(void) {
   }
 
   /* USER CODE END 2 */
-  int temp = 0;
+ 
   uint16_t x = 0,y = 0;
   
-  MG_Backround_Start();
+  //game start:
 
-  MG_Backround_Play();
+  enum Screen currScreen = HOMESCREEN;
+  MG_Homescreen();
+
+
+
   
 
   /* Infinite loop */
@@ -143,19 +159,22 @@ int main(void) {
   while (1) {
     /* USER CODE END WHILE */
 
-    if(HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_3) == GPIO_PIN_SET){
-      button = 1;
-    }else button = 0;
+    //-------------------------------------------------
     
     x = joystick_buffer[0];
     y = joystick_buffer[1];
-    uint16_t temp2 = x + y + button;
+    uint16_t temp2 = x + y;
 
-    /* USER CODE BEGIN 3 */
     if(temp > 100) temp = MIN(temp2, temp);
-    
     temp++;
+    //---------------------------------------------------
+    /* USER CODE BEGIN 3 */
+    
+    //MG_joystick_move();
     HAL_Delay(500);
+    //UTIL_LCD_Clear(0x00000000UL);
+
+
     /* USER CODE END 3 */
   }
 }
@@ -216,10 +235,6 @@ void SystemClock_Config(void) {
 }
 
 /* USER CODE BEGIN 4 */
-void MK_Display_Init(void) {
-  
-}
-
 
 
 /* USER CODE END 4 */

@@ -31,6 +31,8 @@ set(APP_SOURCES
     Core/Src/main.c
     Core/Src/adc.c
     Core/Src/display.c
+    Core/Src/joystick.c
+    Core/Src/game.c
     # All user created source files
 )
 

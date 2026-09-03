@@ -7,5 +7,6 @@ void MG_adc_Init(void);
 extern ADC_HandleTypeDef hadc3;
 extern DMA_HandleTypeDef hdma1;
 extern volatile uint16_t joystick_buffer[2];
+extern volatile uint8_t joystick_button;
 
 #endif

@@ -6,13 +6,15 @@
 #include "stm32h750b_discovery_sdram.h"
 #include "stm32_lcd.h"
 #include <stdint.h>
+#include "game.h"
+#include <stdio.h>
+#include <stdio.h>
 
 #define LINE_THICKNESS 3
 #define BOARD_TOP_LEFT_X 135
 #define BOARD_TOP_LEFT_Y 31
 #define LINE_LENGTH 210
-#define CUBE_SIZE 70
-
+#define SQUARE_SIZE 70
 
 //celoten display: 480 x 272
 int BACKGROUND_LAYER = 0;
@@ -68,7 +70,7 @@ void MG_Display_Init() {
   TS_Init_t touchscreen = {0};
   touchscreen.Width = LCD_DEFAULT_WIDTH;
   touchscreen.Height = LCD_DEFAULT_HEIGHT;
-  touchscreen.Orientation = LCD_ORIENTATION_LANDSCAPE;
+  touchscreen.Orientation = LCD_ORIENTATION_PORTRAIT;
   touchscreen.Accuracy = 5; //TODO
 
   if (BSP_TS_Init(0, &touchscreen) != BSP_ERROR_NONE) {
@@ -85,7 +87,7 @@ void MG_Display_Init() {
   }
 }
 
-void MG_Backround_Start() {
+void MG_Backround_Homescreen() {
 
   if (BSP_LCD_SetActiveLayer(0, BACKGROUND_LAYER) != BSP_ERROR_NONE) {
       Error_Handler();
@@ -100,19 +102,21 @@ void MG_Backround_Start() {
 
   UTIL_LCD_Clear(0x00000000UL);
   UTIL_LCD_SetTextColor(LCD_COLOR_ARGB8888_LIGHTGRAY);
-  UTIL_LCD_SetFont(&Font24);
-  UTIL_LCD_DisplayStringAt(7, 200, (uint8_t*) "PLAY", CENTER_MODE);
+  UTIL_LCD_SetFont(&Font20);
+  UTIL_LCD_DisplayStringAt(61, 230, (uint8_t*) "PLAY", LEFT_MODE);//margin 10
+  UTIL_LCD_DisplayStringAt(300, 230, (uint8_t*) "RESTART", LEFT_MODE); //Xpos = (460/4)*2
   UTIL_LCD_DisplayStringAt(40, 30, (uint8_t*) "PLAYER 1:", LEFT_MODE);
   UTIL_LCD_DisplayStringAt(270,30, (uint8_t*) "PLAYER 2:", LEFT_MODE);
 
-  //score = Xpos + 160
-  UTIL_LCD_DisplayStringAt(430,30, (uint8_t*) "5", LEFT_MODE);
+  unsigned char buff[20];
+  snprintf(buff, sizeof(buff), "%d", score[0]);
+  UTIL_LCD_DisplayStringAt(410,30,   (uint8_t*) &buff, LEFT_MODE);
 
 }
 
 
 
-void MG_Backround_Play() {
+void MG_Backround_PlayScreen() {
 
   if (BSP_LCD_SetActiveLayer(0, FIRST_LAYER) != BSP_ERROR_NONE) {
     Error_Handler();
@@ -125,20 +129,74 @@ void MG_Backround_Play() {
   }
 
   UTIL_LCD_Clear(LCD_COLOR_ARGB8888_BLACK);
-  UTIL_LCD_FillRect(BOARD_TOP_LEFT_X + CUBE_SIZE, BOARD_TOP_LEFT_Y, LINE_THICKNESS, LINE_LENGTH, LCD_COLOR_ARGB8888_RED);
-  UTIL_LCD_FillRect(BOARD_TOP_LEFT_X + 2 * CUBE_SIZE, BOARD_TOP_LEFT_Y, LINE_THICKNESS, LINE_LENGTH, LCD_COLOR_ARGB8888_RED);
-  UTIL_LCD_FillRect(BOARD_TOP_LEFT_X, BOARD_TOP_LEFT_Y + CUBE_SIZE, LINE_LENGTH, LINE_THICKNESS, LCD_COLOR_ARGB8888_RED);
-  UTIL_LCD_FillRect(BOARD_TOP_LEFT_X, BOARD_TOP_LEFT_Y + 2 * CUBE_SIZE, LINE_LENGTH, LINE_THICKNESS, LCD_COLOR_ARGB8888_RED);
+  UTIL_LCD_FillRect(BOARD_TOP_LEFT_X + SQUARE_SIZE, BOARD_TOP_LEFT_Y, LINE_THICKNESS, LINE_LENGTH, LCD_COLOR_ARGB8888_RED);
+  UTIL_LCD_FillRect(BOARD_TOP_LEFT_X + 2 * SQUARE_SIZE, BOARD_TOP_LEFT_Y, LINE_THICKNESS, LINE_LENGTH, LCD_COLOR_ARGB8888_RED);
+  UTIL_LCD_FillRect(BOARD_TOP_LEFT_X, BOARD_TOP_LEFT_Y + SQUARE_SIZE, LINE_LENGTH, LINE_THICKNESS, LCD_COLOR_ARGB8888_RED);
+  UTIL_LCD_FillRect(BOARD_TOP_LEFT_X, BOARD_TOP_LEFT_Y + 2 * SQUARE_SIZE, LINE_LENGTH, LINE_THICKNESS, LCD_COLOR_ARGB8888_RED);
 
-  MG_SelectField(0, 0, LCD_COLOR_ARGB8888_BLUE);
+  MG_Playscreen_SelectField(0, 0);
 
 }
 
-void MG_SelectField(uint32_t x, uint32_t y, uint32_t color){
+void MG_Playscreen_SelectField(uint32_t x, uint32_t y){
 
   if (BSP_LCD_SetActiveLayer(0, FIRST_LAYER) != BSP_ERROR_NONE) {
     Error_Handler();
   }
 
-  UTIL_LCD_DrawRect(BOARD_TOP_LEFT_X + x + 1, BOARD_TOP_LEFT_Y + y + 1, CUBE_SIZE - 1, CUBE_SIZE - 1, color);
+  UTIL_LCD_DrawRect(BOARD_TOP_LEFT_X + x + 1, BOARD_TOP_LEFT_Y + y + 1, SQUARE_SIZE - 1, SQUARE_SIZE - 1, LCD_COLOR_ARGB8888_WHITE);
 }
+
+void MG_Homescreen_SelectPlayButton(){
+
+  UTIL_LCD_SetFont(&Font20);
+  UTIL_LCD_ClearStringLine( BUTTON_PLAY_Y / Font20.Height);
+  UTIL_LCD_ClearStringLine( BUTTON_PLAY_Y / Font20.Height + 1);
+
+  // UTIL_LCD_SetFont(&Font16);
+  // UTIL_LCD_SetTextColor(BUTTON_RESTART_COLOR);
+  // UTIL_LCD_DisplayStringAt(BUTTON_RESTART_X, BUTTON_RESTART_Y, (uint8_t*)"RESTART", LEFT_MODE);
+
+
+  UTIL_LCD_SetTextColor(LCD_COLOR_ARGB8888_ORANGE);
+  UTIL_LCD_SetFont(&Font24);
+  UTIL_LCD_DisplayStringAt(BUTTON_PLAY_X, BUTTON_PLAY_Y, (uint8_t*)"PLAY", LEFT_MODE);
+
+}
+
+void MG_Homescreen_UnselectPlayButton(){
+
+  UTIL_LCD_SetFont(&Font24);
+  UTIL_LCD_ClearStringLine(BUTTON_PLAY_Y / Font24.Height + 1);
+  UTIL_LCD_ClearStringLine(BUTTON_PLAY_Y / Font24.Height);
+
+
+  UTIL_LCD_SetTextColor(BUTTON_PLAY_COLOR);
+  UTIL_LCD_SetFont(&Font20);
+  UTIL_LCD_DisplayStringAt(BUTTON_PLAY_X, BUTTON_PLAY_Y, (uint8_t*)"PLAY", LEFT_MODE);
+
+}
+
+void MG_Homescreen_SelectRestartButton(){
+  UTIL_LCD_SetFont(&Font16);
+  UTIL_LCD_ClearStringLine(BUTTON_RESTART_Y / Font16.Height);
+  UTIL_LCD_ClearStringLine(BUTTON_RESTART_Y / Font16.Height + 1);
+
+  UTIL_LCD_SetTextColor(LCD_COLOR_ARGB8888_ORANGE);
+  UTIL_LCD_SetFont(&Font20);
+  UTIL_LCD_DisplayStringAt(BUTTON_RESTART_X, BUTTON_RESTART_Y, (uint8_t*)"RESTART", LEFT_MODE);
+
+}
+
+void MG_Homescreen_UnselectRestartButton(){
+
+  UTIL_LCD_SetFont(&Font20);
+  UTIL_LCD_ClearStringLine(BUTTON_RESTART_Y / Font20.Height);
+  UTIL_LCD_ClearStringLine(BUTTON_RESTART_Y / Font20.Height + 1);
+
+  UTIL_LCD_SetTextColor(BUTTON_RESTART_COLOR);
+  UTIL_LCD_SetFont(&Font16);
+  UTIL_LCD_DisplayStringAt(BUTTON_RESTART_X, BUTTON_RESTART_Y, (uint8_t*)"RESTART", LEFT_MODE);
+
+}
+

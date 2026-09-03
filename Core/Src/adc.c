@@ -12,6 +12,7 @@ GPIO_InitTypeDef pg3Button = {0};
 
 __attribute__((section(".dma_buffer"), aligned(32)))
 volatile uint16_t joystick_buffer[2];
+volatile uint8_t joystick_button; //ko button ni pritisnjen je joystick_button = 1
 
 
 void MG_adc_Init(void){
