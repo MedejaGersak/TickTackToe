@@ -33,6 +33,9 @@ set(APP_SOURCES
     Core/Src/display.c
     Core/Src/joystick.c
     Core/Src/game.c
+    Core/Src/ts_bounds.c
+    Core/Src/legal_move.c
+
     # All user created source files
 )
 

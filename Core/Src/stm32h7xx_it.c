@@ -24,6 +24,10 @@
 #include "stm32h7xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "game.h"
+#include "stm32_lcd.h"
+#include "stm32h750b_discovery_errno.h"
+#include "stm32h750b_discovery_lcd.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,7 +47,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-
+int lastTouch = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -206,7 +210,22 @@ void EXTI2_IRQHandler () {
     BSP_TS_IRQHandler(0);
 }
 
+
 void BSP_TS_Callback(uint32_t Instance) {
+
+    if(HAL_GetTick() - lastTouch < 225){
+      touch.TouchDetected = 0;
+      return;
+    } 
+
+  if(BSP_TS_GetState(0, &touch) != BSP_ERROR_NONE){
+    Error_Handler();
+  }
+  touch.TouchX = CLAMP((touch.TouchX * FT5336_MAX_X_LENGTH) / LCD_DEFAULT_WIDTH, 0, LCD_DEFAULT_WIDTH);
+  touch.TouchY = CLAMP((touch.TouchY * FT5336_MAX_Y_LENGTH) / LCD_DEFAULT_HEIGHT, 0, LCD_DEFAULT_HEIGHT);
+  
+  lastTouch = HAL_GetTick();
+  
 
 }
 

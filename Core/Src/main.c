@@ -35,6 +35,7 @@
 #include "adc.h"
 #include "display.h"
 #include "game.h"
+#include "ts_bounds.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -47,17 +48,6 @@
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-#define SCREEN_WIDTH 480
-#define SCREEN_HEIGHT 272
-#define BUFFER_WIDTH 96  // 480/4 - gives us nice 4x4 pixel blocks
-#define BUFFER_HEIGHT 68 // 272/4
-
-#define MIN(a, b) (a > b) ? b : a
-
-// Framebuffer addresses for double buffering
-#define LCD_FRAME_BUFFER_LAYER0 0xD0000000
-#define LCD_FRAME_BUFFER_LAYER1 0xD0177000
 
 /* USER CODE END PD */
 
@@ -142,13 +132,29 @@ int main(void) {
   }
 
   /* USER CODE END 2 */
- 
-  uint16_t x = 0,y = 0;
+
   
   //game start:
 
   enum Screen currScreen = HOMESCREEN;
-  MG_Homescreen();
+  MG_TS_bounds_Init();
+  MG_Board_Init();
+  int iteration = 0;
+
+  while(1){
+
+    if (currScreen == HOMESCREEN){
+
+      if(MG_Homescreen() == PLAY) currScreen = PLAYSCREEN;
+      else score[0] = 0; score[1] = 0;
+
+    }else{
+
+      playerOnMove = iteration % 2;
+      MG_Playscreen();
+      currScreen = HOMESCREEN;
+    }
+  }
 
 
 
@@ -161,12 +167,6 @@ int main(void) {
 
     //-------------------------------------------------
     
-    x = joystick_buffer[0];
-    y = joystick_buffer[1];
-    uint16_t temp2 = x + y;
-
-    if(temp > 100) temp = MIN(temp2, temp);
-    temp++;
     //---------------------------------------------------
     /* USER CODE BEGIN 3 */
     

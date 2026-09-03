@@ -1,20 +1,40 @@
 #include "game.h"
 #include "adc.h"
 #include "joystick.h"
+#include "legal_move.h"
 #include "main.h"
 #include "display.h"
+#include "stm32h750b_discovery_lcd.h"
 #include "stm32h7xx_hal_gpio.h"
 #include "stm32h750b_discovery_ts.h"
 // #include "stm32h750b_discovery_lcd.h"
 // #include "stm32h7xx_hal_ltdc.h"
 #include "stm32_lcd.h"
+#include "ts_bounds.h"
+
+#define INBOUNDS(val, min, max) ((val) < (min) ? 0 : ((val) > (max) ? 0 : 1))
 
 
 int score[] = {0,0};
 TS_State_t touch;
 
-#define BUTTON_PLAY_UPPER_MARGIN_X (BUTTON_PLAY_X - (*BUTTON_PLAY_SIZE).Height)
-#define BUTTON_PLAY_LOWER_MARGIN_X BUTTON_PLAY_X
+square_bounds board[3][3];
+int playerOnMove;
+
+void MG_Board_Init(){
+
+    board[0][0] = square00Bounds;
+    board[0][1] = square01Bounds;
+    board[0][2] = square02Bounds;
+    board[1][0] = square10Bounds;
+    board[1][1] = square11Bounds;
+    board[1][2] = square12Bounds;
+    board[2][0] = square20Bounds;
+    board[2][1] = square21Bounds;
+    board[2][2] = square22Bounds;
+}
+
+
 
 enum Homescreen MG_Homescreen(){
 
@@ -25,16 +45,25 @@ enum Homescreen MG_Homescreen(){
 
     while(1){
 
-        BSP_TS_GetState(0, &touch);
-
+        //touchscreen
         if(touch.TouchDetected == 1){
-            if(touch.TouchX >= BUTTON_PLAY_LOWER_MARGIN_X && touch.TouchX <= BUTTON_PLAY_UPPER_MARGIN_X){
-                return currButton;
+
+            if(INBOUNDS(touch.TouchX, buttonPlayTsBounds.XlowerBound, buttonPlayTsBounds.XupperBound)
+               && 
+               INBOUNDS(touch.TouchY, buttonPlayTsBounds.YlowerBound, buttonPlayTsBounds.YupperBound)) {
+                return PLAY;
             }
+
+            if (INBOUNDS(touch.TouchX, buttonRestartTsBounds.XlowerBound, buttonRestartTsBounds.XupperBound)
+                &&
+                INBOUNDS(touch.TouchY, buttonRestartTsBounds.YlowerBound, buttonRestartTsBounds.YupperBound)) {
+                return RESTART;
+            }
+
         }
 
-
-        if((joystick_button = (HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_3))) == GPIO_PIN_RESET){
+        //joystick
+        if((joystick_button = MG_joystick_button()) == GPIO_PIN_RESET){
             return currButton;
         }
 
@@ -53,9 +82,71 @@ enum Homescreen MG_Homescreen(){
     }
 }
 
+
+
+
 void MG_Playscreen(){
 
     MG_Backround_Playscreen();
+    int32_t x = 0, y = 0; //board[y][x] !!!!!
+    MG_Playscreen_SelectField(board[y][x].XlowerBound, board[y][x].YlowerBound);
 
-    enum Playscreen currSquare = SQUARE_1_1;
+    while(1){
+
+        //toucscreen
+        if(touch.TouchDetected == 1){
+            //TODO posici v kateri kvadratek smo kliknili
+        }
+
+
+        //joystick:
+        if((joystick_button = MG_joystick_button()) == GPIO_PIN_RESET){
+            MG_empty_square(x, y);
+        }
+
+        enum Move mx = MG_joystick_move();
+
+        switch (mx){
+
+            case UP: 
+                if((y-1) >= 0){
+                    MG_Playscreen_UnselectField(board[y][x].XlowerBound, board[y][x].YlowerBound);
+                    y--;
+                    MG_Playscreen_SelectField(board[y][x].XlowerBound, board[y][x].YlowerBound);
+                }
+                break;
+
+            case DOWN:
+                if((y+1) <= 2){
+                    MG_Playscreen_UnselectField(board[y][x].XlowerBound, board[y][x].YlowerBound);
+                    y++;
+                    MG_Playscreen_SelectField(board[y][x].XlowerBound, board[y][x].YlowerBound);
+                } 
+                break;
+
+            case LEFT:
+                if((x-1) >= 0){
+                    MG_Playscreen_UnselectField(board[y][x].XlowerBound, board[y][x].YlowerBound);
+                    x--;
+                    MG_Playscreen_SelectField(board[y][x].XlowerBound, board[y][x].YlowerBound);
+                }
+                break;
+
+            case RIGHT:
+                if((x+1) <= 2){
+                    MG_Playscreen_UnselectField(board[y][x].XlowerBound, board[y][x].YlowerBound);
+                    x++;
+                    MG_Playscreen_SelectField(board[y][x].XlowerBound, board[y][x].YlowerBound);
+                }
+                break;
+
+            default:
+        }
+
+
+
+
+    }
+
+
 }
