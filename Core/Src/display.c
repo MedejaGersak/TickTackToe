@@ -2,6 +2,7 @@
 #include "display.h"
 #include "stm32h750b_discovery_lcd.h"
 #include "stm32h750b_discovery_ts.h"
+#include "stm32h7xx_hal.h"
 #include "stm32h7xx_hal_ltdc.h"
 #include "stm32h750b_discovery_sdram.h"
 #include "stm32_lcd.h"
@@ -27,6 +28,10 @@
 #define TRANSPARENT 0x00000000UL
 #define CIRCLE_AND_X_MARGIN 20
 #define PLAYBOARD_COLOR LCD_COLOR_ARGB8888_RED
+
+#define SYMBOL_X 420
+#define SYMBOL_Y 20
+#define SYMBOL_DIFF 30
 
 //celoten display: 480 x 272
 int BACKGROUND_LAYER = 0;
@@ -116,19 +121,38 @@ void MG_Backround_Homescreen() {
 
   UTIL_LCD_SetTextColor(BUTTON_PLAY_COLOR);
   UTIL_LCD_SetFont(BUTTON_PLAY_SIZE);
-  UTIL_LCD_DisplayStringAt(BUTTON_PLAY_X, BUTTON_PLAY_Y, (uint8_t*) "PLAY", LEFT_MODE);//margin 10
+  UTIL_LCD_DisplayStringAt(BUTTON_PLAY_X, BUTTON_PLAY_Y, (uint8_t*) "PLAY", BUTTON_PLAY_MODE);//margin 10
 
   UTIL_LCD_SetTextColor(BUTTON_RESTART_COLOR);
   UTIL_LCD_SetFont(BUTTON_RESTART_SIZE);
-  UTIL_LCD_DisplayStringAt(BUTTON_RESTART_X, BUTTON_RESTART_Y, (uint8_t*) "RESTART", LEFT_MODE); //Xpos = (460/4)*2
+  UTIL_LCD_DisplayStringAt(BUTTON_RESTART_X, BUTTON_RESTART_Y, (uint8_t*) "RESTART", BUTTON_RESTART_MODE); //Xpos = (460/4)*2
+
 
   UTIL_LCD_SetTextColor(TEXT_PALYER1_COLOR);
   UTIL_LCD_SetFont(TEXT_PALYER1_SIZE);
-  UTIL_LCD_DisplayStringAt(TEXT_PLAYER1_X, TEXT_PLAYER1_Y, (uint8_t*) "PLAYER 1:", LEFT_MODE);
-  UTIL_LCD_DisplayStringAt(TEXT_PLAYER2_X,TEXT_PLAYER2_Y, (uint8_t*) "PLAYER 2:", LEFT_MODE);
+  UTIL_LCD_DisplayStringAt(TEXT_PLAYER1_X, TEXT_PLAYER1_Y, (uint8_t*) "PLAYER", LEFT_MODE);
 
-  unsigned char buff0[20];
-  unsigned char buff1[20];
+  UTIL_LCD_SetTextColor(PLAYER0_COLOR);
+  UTIL_LCD_DisplayStringAt(TEXT_PLAYER1_X + (*TEXT_PALYER1_SIZE).Width * 6, TEXT_PLAYER1_Y, (uint8_t*) " X", LEFT_MODE);
+
+  UTIL_LCD_SetTextColor(TEXT_PALYER1_COLOR);
+  UTIL_LCD_DisplayStringAt(TEXT_PLAYER1_X + (*TEXT_PALYER1_SIZE).Width * 8, TEXT_PLAYER1_Y, (uint8_t*) ":", LEFT_MODE);
+
+  UTIL_LCD_SetTextColor(TEXT_PALYER2_COLOR);
+  UTIL_LCD_SetFont(TEXT_PALYER2_SIZE);
+
+  UTIL_LCD_DisplayStringAt(TEXT_PLAYER2_X,TEXT_PLAYER2_Y, (uint8_t*) "PLAYER", LEFT_MODE);
+
+  UTIL_LCD_SetTextColor(PLAYER1_COLOR);
+  UTIL_LCD_DisplayStringAt(TEXT_PLAYER2_X + (*TEXT_PALYER2_SIZE).Width * 6, TEXT_PLAYER2_Y, (uint8_t*) " O", LEFT_MODE);
+
+  UTIL_LCD_SetTextColor(TEXT_PALYER2_COLOR);
+  UTIL_LCD_DisplayStringAt(TEXT_PLAYER2_X + (*TEXT_PALYER2_SIZE).Width * 8, TEXT_PLAYER2_Y, (uint8_t*) ":", LEFT_MODE);
+
+
+
+  char buff0[20];
+  char buff1[20];
   snprintf(buff0, sizeof(buff0), "%d", score[0]);
   snprintf(buff1, sizeof(buff1), "%d", score[1]);
   UTIL_LCD_DisplayStringAt(PLAYER1_SCORE_X, TEXT_PLAYER1_Y,   (uint8_t*) &buff0, LEFT_MODE);
@@ -157,6 +181,22 @@ void MG_Backround_Playscreen() {
   }
   UTIL_LCD_Clear(0x00000000UL);
 
+  MG_DrawPlayerOnMoveSymbol();
+}
+
+
+
+void MG_DrawPlayerOnMoveSymbol(){
+
+  UTIL_LCD_FillRect(SYMBOL_X, SYMBOL_Y,SYMBOL_DIFF + CIRCLE_AND_X_MARGIN , SYMBOL_DIFF + CIRCLE_AND_X_MARGIN, TRANSPARENT);
+
+  if(playerOnMove == 0){
+    UTIL_LCD_DrawLine(SYMBOL_X,SYMBOL_Y,SYMBOL_X + SYMBOL_DIFF,SYMBOL_Y + SYMBOL_DIFF, PLAYER0_COLOR);
+    UTIL_LCD_DrawLine(SYMBOL_X, SYMBOL_Y + SYMBOL_DIFF, SYMBOL_X + SYMBOL_DIFF, SYMBOL_Y, PLAYER0_COLOR);
+  }else{
+
+    UTIL_LCD_DrawCircle((SYMBOL_X + SYMBOL_X + SYMBOL_DIFF) / 2, (SYMBOL_Y + SYMBOL_Y + SYMBOL_DIFF) / 2, SYMBOL_DIFF / 2, PLAYER1_COLOR);
+  }
 }
 
 void MG_Playscreen_SelectField(uint32_t x, uint32_t y){
@@ -188,7 +228,7 @@ void MG_Homescreen_SelectPlayButton(){
 
   UTIL_LCD_SetTextColor(LCD_COLOR_ARGB8888_ORANGE);
   UTIL_LCD_SetFont(&Font24);
-  UTIL_LCD_DisplayStringAt(BUTTON_PLAY_X, BUTTON_PLAY_Y, (uint8_t*)"PLAY", LEFT_MODE);
+  UTIL_LCD_DisplayStringAt(BUTTON_PLAY_X, BUTTON_PLAY_Y, (uint8_t*)"PLAY", BUTTON_PLAY_MODE);
 
 }
 
@@ -201,7 +241,7 @@ void MG_Homescreen_UnselectPlayButton(){
 
   UTIL_LCD_SetTextColor(BUTTON_PLAY_COLOR);
   UTIL_LCD_SetFont(&Font20);
-  UTIL_LCD_DisplayStringAt(BUTTON_PLAY_X, BUTTON_PLAY_Y, (uint8_t*)"PLAY", LEFT_MODE);
+  UTIL_LCD_DisplayStringAt(BUTTON_PLAY_X, BUTTON_PLAY_Y, (uint8_t*)"PLAY", BUTTON_PLAY_MODE);
 
 }
 
@@ -212,7 +252,7 @@ void MG_Homescreen_SelectRestartButton(){
 
   UTIL_LCD_SetTextColor(LCD_COLOR_ARGB8888_ORANGE);
   UTIL_LCD_SetFont(&Font20);
-  UTIL_LCD_DisplayStringAt(BUTTON_RESTART_X, BUTTON_RESTART_Y, (uint8_t*)"RESTART", LEFT_MODE);
+  UTIL_LCD_DisplayStringAt(BUTTON_RESTART_X, BUTTON_RESTART_Y, (uint8_t*)"RESTART", BUTTON_RESTART_MODE);
 
 }
 
@@ -224,21 +264,115 @@ void MG_Homescreen_UnselectRestartButton(){
 
   UTIL_LCD_SetTextColor(BUTTON_RESTART_COLOR);
   UTIL_LCD_SetFont(&Font16);
-  UTIL_LCD_DisplayStringAt(BUTTON_RESTART_X, BUTTON_RESTART_Y, (uint8_t*)"RESTART", LEFT_MODE);
+  UTIL_LCD_DisplayStringAt(BUTTON_RESTART_X, BUTTON_RESTART_Y, (uint8_t*)"RESTART", BUTTON_RESTART_MODE);
 
 }
 
 void MG_Playscreen_DrawCircle(int32_t x, int32_t y, uint32_t color){
 
+  if (BSP_LCD_SetActiveLayer(0, BACKGROUND_LAYER) != BSP_ERROR_NONE) {
+    Error_Handler();
+  }
+
   UTIL_LCD_DrawCircle((board[y][x].XupperBound + board[y][x].XlowerBound) / 2, (board[y][x].YupperBound + board[y][x].YlowerBound) / 2,  (board[y][x].YupperBound - board[y][x].YlowerBound) / 2 - CIRCLE_AND_X_MARGIN, color);
 
+  if (BSP_LCD_SetActiveLayer(0, FIRST_LAYER) != BSP_ERROR_NONE) {
+    Error_Handler();
+  }
 }
 
 void MG_Playscreen_DrawX(int32_t x, int32_t y, uint32_t color){
+
+  if (BSP_LCD_SetActiveLayer(0, BACKGROUND_LAYER) != BSP_ERROR_NONE) {
+    Error_Handler();
+  }
   // \ line
   UTIL_LCD_DrawLine(board[y][x].XlowerBound + CIRCLE_AND_X_MARGIN, board[y][x].YlowerBound + CIRCLE_AND_X_MARGIN, board[y][x].XupperBound - CIRCLE_AND_X_MARGIN, board[y][x].YupperBound - CIRCLE_AND_X_MARGIN, color);
   // / line
   UTIL_LCD_DrawLine(board[y][x].XlowerBound + CIRCLE_AND_X_MARGIN, board[y][x].YupperBound - CIRCLE_AND_X_MARGIN, board[y][x].XupperBound - CIRCLE_AND_X_MARGIN, board[y][x].YlowerBound + CIRCLE_AND_X_MARGIN, color);
+
+  if (BSP_LCD_SetActiveLayer(0, FIRST_LAYER) != BSP_ERROR_NONE) {
+    Error_Handler();
+  }
+}
+
+void MG_End_of_game_screen(int32_t x1, int32_t y1, int32_t x2, int32_t y2){
+
+  if(gameStatus != DRAW){
+
+    UTIL_LCD_DrawLine(x1, y1, x2, y2, PLAYBOARD_COLOR);
+
+    HAL_Delay(800);
+
+    UTIL_LCD_DrawLine(x1, y1, x2, y2, TRANSPARENT);
+
+    HAL_Delay(800);
+
+    UTIL_LCD_DrawLine(x1, y1, x2, y2, PLAYBOARD_COLOR);
+
+    HAL_Delay(300);
+  }
+
+  HAL_Delay(500);
+
+  for(int i = 0; i <= 272; i++){
+
+    if (BSP_LCD_SetActiveLayer(0, BACKGROUND_LAYER) != BSP_ERROR_NONE) {
+      Error_Handler();
+    }
+    UTIL_LCD_DrawHLine(0, i, 480, LCD_COLOR_ARGB8888_BLACK);
+
+    if (BSP_LCD_SetActiveLayer(0, FIRST_LAYER) != BSP_ERROR_NONE) {
+      Error_Handler();
+    }
+    UTIL_LCD_DrawHLine(0, i, 480, TRANSPARENT);
+
+    HAL_Delay(5);
+  }
+
+  if(gameStatus == DRAW){
+    if (BSP_LCD_SetActiveLayer(0, FIRST_LAYER) != BSP_ERROR_NONE) {
+      Error_Handler();
+    }
+
+    UTIL_LCD_SetTextColor(LCD_COLOR_ARGB8888_RED);
+    UTIL_LCD_SetFont(&Font24);
+
+    UTIL_LCD_DisplayStringAt(0, 136, (uint8_t*)"DRAW", CENTER_MODE);
+
+    HAL_Delay(800);
+
+    UTIL_LCD_Clear(TRANSPARENT);
+
+    HAL_Delay(800);
+
+    UTIL_LCD_DisplayStringAt(0, 136, (uint8_t*)"DRAW", CENTER_MODE);
+
+    HAL_Delay(800);
+  }
+
+
+
+  // char player1_win[] = "PLAYER1 WINS";
+  // char player2_win[] = "PLAYER2 WINS";
+  // char draw[] = "DRAW";
+
+  // uint8_t* p;
+
+  // if(gameStatus == PLAYER1_WIN) p = (uint8_t*)player1_win;
+  // else if(gameStatus == PLAYER2_WIN) p = (uint8_t*)player2_win;
+  // else p = (uint8_t*)draw;
+
+  // UTIL_LCD_Clear(0x00000000UL);
+
+  // UTIL_LCD_SetTextColor(BUTTON_RESTART_COLOR);
+  // UTIL_LCD_SetFont(&Font24);
+  // UTIL_LCD_DisplayStringAt(240, 136, p, LEFT_MODE);
+
+  
+
+
+
 
 }
 

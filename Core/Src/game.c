@@ -45,6 +45,7 @@ enum Homescreen MG_Homescreen(){
 
         //touchscreen
         if(field_or_button_pressed == 1){
+            field_or_button_pressed = 0;
 
             if(INBOUNDS(touch.TouchX, buttonPlayTsBounds.XlowerBound, buttonPlayTsBounds.XupperBound)
                && 
@@ -57,7 +58,6 @@ enum Homescreen MG_Homescreen(){
                 INBOUNDS(touch.TouchY, buttonRestartTsBounds.YlowerBound, buttonRestartTsBounds.YupperBound)) {
                 return RESTART;
             }
-            field_or_button_pressed = 0;
         }
 
         //joystick
@@ -79,13 +79,13 @@ enum Homescreen MG_Homescreen(){
         }
     }
 }
-int32_t x = 0, y = 0;
+
 
 void MG_Playscreen(){
 
     MG_Backround_Playscreen();
     gameStatus = ONGOING;
-    //board[y][x] !!!!!
+    int32_t x = 0, y = 0;//board[y][x] !!!!!
     MG_Playscreen_SelectField(board[y][x].XlowerBound, board[y][x].YlowerBound);
 
     while(1){

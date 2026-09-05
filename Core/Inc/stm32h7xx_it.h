@@ -57,7 +57,7 @@ void PendSV_Handler(void);
 void SysTick_Handler(void);
 /* USER CODE BEGIN EFP */
 
-extern int field_or_button_pressed;
+extern volatile uint8_t field_or_button_pressed;
 
 /* USER CODE END EFP */
 

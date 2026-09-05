@@ -8,9 +8,6 @@
 //player1: id: 0 ---> liveBoard: 1
 //player2: id: 1 ---> liveBoard: 5
 
-#define PLAYER0_COLOR LCD_COLOR_ARGB8888_RED
-#define PLAYER1_COLOR LCD_COLOR_ARGB8888_BLUE
-
 
 int liveBoard[4][4];
 int diagonala_00_22 = 0;
@@ -50,6 +47,57 @@ void MG_empty_square(int32_t x, int32_t y){
     // ce so vsa polja zapolnjena in ni zmagovalca te vrze nazaj na homescreen in rece da je draw
     //ne pozabi clear-at liveBoard-a in squaresFilled nazaj na 0 za novo igro
 
+
+    int32_t Xpos1 = 0, Ypos1 = 0, Xpos2 = 0, Ypos2 = 0;
+
+    if(liveBoard[y][3] == 3 || liveBoard[y][3] == 15){
+        if(liveBoard[y][3] == 3)gameStatus = PLAYER1_WIN;
+        if(liveBoard[y][3] == 15)gameStatus = PLAYER2_WIN;
+
+
+        Xpos1 = board[y][0].XlowerBound;
+        Ypos1 = (board[y][0].YupperBound + board[y][0].YlowerBound) / 2;
+
+        Xpos2 = board[y][2].XupperBound;
+        Ypos2 = Ypos1;
+    }
+
+    if(liveBoard[3][x] == 3 || liveBoard[3][x] == 15){
+        if(liveBoard[3][x] == 3)gameStatus = PLAYER1_WIN;
+        if(liveBoard[3][x] == 15)gameStatus = PLAYER2_WIN;
+
+        Xpos1 = (board[0][x].XupperBound + board[0][x].XlowerBound) / 2;
+        Ypos2 = board[0][x].YlowerBound;
+
+        Xpos2 = Xpos1;
+        Ypos1 = board[2][x].YupperBound;
+    }
+
+    if(x == y && (diagonala_00_22 == 3 || diagonala_00_22 == 15)){
+        if(diagonala_00_22 == 3)gameStatus = PLAYER1_WIN;
+        if(diagonala_00_22 == 15)gameStatus = PLAYER2_WIN;
+
+        Xpos1 = board[0][0].XlowerBound;
+        Ypos1 = board[0][0].YlowerBound;
+
+        Xpos2 = board[2][2].XupperBound;
+        Ypos2 = board[2][2].YupperBound;
+    }
+
+    if(((x == 1 && x == y) || abs(x-y) == 2) && (diagonala_02_20 == 3 || diagonala_02_20 == 15)){
+        if(diagonala_02_20 == 3) gameStatus = PLAYER1_WIN;
+        if(diagonala_02_20 == 15) gameStatus = PLAYER2_WIN;
+
+        Xpos1 = board[2][0].XlowerBound;
+        Ypos1 = board[2][0].YupperBound;
+
+        Xpos2 = board[0][2].XupperBound;
+        Ypos2 = board[0][2].YlowerBound;
+    }
+
+    //------
+
+    /*
     for(int i = 0; i < 4; i++){
 
         if(i != 3 && liveBoard[i][3] == 3) gameStatus = PLAYER1_WIN;
@@ -69,6 +117,8 @@ void MG_empty_square(int32_t x, int32_t y){
     if(diagonala_02_20 == 3) gameStatus = PLAYER1_WIN;
     else if(diagonala_02_20 == 15) gameStatus = PLAYER2_WIN;
 
+    */
+
     if(squaresFilled == 9 && gameStatus == ONGOING) gameStatus = DRAW;
 
     if(gameStatus != ONGOING){
@@ -82,6 +132,11 @@ void MG_empty_square(int32_t x, int32_t y){
         squaresFilled = 0;
         diagonala_00_22 = 0;
         diagonala_02_20 = 0;
+
+        MG_End_of_game_screen(Xpos1, Ypos1, Xpos2, Ypos2);
+    }else{
+
+        MG_DrawPlayerOnMoveSymbol();
     }
 
 

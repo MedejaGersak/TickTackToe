@@ -59,7 +59,6 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-//static uint32_t *currentFrameBuffer = (uint32_t *)LCD_FRAME_BUFFER_LAYER0;
 
 /* USER CODE END PV */
 
@@ -67,6 +66,8 @@
 void SystemClock_Config(void);
 static void MPU_Config(void);
 /* USER CODE BEGIN PFP */
+
+
 
 
 /* USER CODE END PFP */
@@ -151,6 +152,7 @@ int main(void) {
     }else{
 
       playerOnMove = iteration % 2;
+      iteration++;
       MG_Playscreen();
 
       switch(gameStatus){
@@ -162,6 +164,8 @@ int main(void) {
         case PLAYER2_WIN:
           score[1] += 1;
           break;
+
+        default: break;
       }
 
       currScreen = HOMESCREEN;
@@ -247,6 +251,14 @@ void SystemClock_Config(void) {
 }
 
 /* USER CODE BEGIN 4 */
+
+
+int32_t MG_Clamp(int32_t val, int32_t min, int32_t max){
+
+  if(val < min) return min;
+  if(val > max) return max;
+  return val;
+}
 
 
 /* USER CODE END 4 */

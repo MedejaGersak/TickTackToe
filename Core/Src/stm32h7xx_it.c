@@ -205,41 +205,49 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /* USER CODE BEGIN 1 */
-void EXTI2_IRQHandler () {
-
+void EXTI2_IRQHandler (void) {
     BSP_TS_IRQHandler(0);
 }
 
-// int lastTouchDetect;
-int field_or_button_pressed;
+static volatile uint8_t fingerIsDown = 0; 
 
+volatile uint8_t field_or_button_pressed = 0;
 
 void BSP_TS_Callback(uint32_t Instance) {
 
-    if(BSP_TS_GetState(0, &touch) != BSP_ERROR_NONE){
-      Error_Handler();
-    }
+  TS_State_t currInterrupt;
 
-  if(HAL_GetTick() - lastTouchTime < 225){
-    field_or_button_pressed = 0;
+  if (BSP_TS_GetState(Instance, &currInterrupt) != BSP_ERROR_NONE) {
+    Error_Handler();
+  }
+
+  currInterrupt.TouchX = MG_Clamp((currInterrupt.TouchX * FT5336_MAX_X_LENGTH) / LCD_DEFAULT_WIDTH, 0, LCD_DEFAULT_WIDTH);
+  currInterrupt.TouchY = MG_Clamp((currInterrupt.TouchY * FT5336_MAX_Y_LENGTH) / LCD_DEFAULT_HEIGHT, 0, LCD_DEFAULT_HEIGHT);
+
+  // prst dol
+  if(currInterrupt.TouchDetected && !fingerIsDown){
+    fingerIsDown = 1;
+
     return;
   }
 
-  while(1){
-    if(BSP_TS_GetState(0, &touch) != BSP_ERROR_NONE){
-      Error_Handler();
-    }
-
-    if(touch.TouchDetected == 0) break;
-
+  // prst se vedno dol
+  if (currInterrupt.TouchDetected && fingerIsDown) {
+     return; 
   }
 
-  touch.TouchX = CLAMP((touch.TouchX * FT5336_MAX_X_LENGTH) / LCD_DEFAULT_WIDTH, 0, LCD_DEFAULT_WIDTH);
-  touch.TouchY = CLAMP((touch.TouchY * FT5336_MAX_Y_LENGTH) / LCD_DEFAULT_HEIGHT, 0, LCD_DEFAULT_HEIGHT);
-  field_or_button_pressed = 1;
-  
-  lastTouchTime = HAL_GetTick();
-  
+  // prst gre gor
+  if (!currInterrupt.TouchDetected && fingerIsDown) { 
+    fingerIsDown = 0; 
+
+    touch.TouchX = currInterrupt.TouchX;
+    touch.TouchY = currInterrupt.TouchY;
+
+    field_or_button_pressed = 1; 
+    return; 
+  }
+
+  field_or_button_pressed = 0;
 }
 
 /* USER CODE END 1 */
