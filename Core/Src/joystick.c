@@ -56,6 +56,6 @@ uint16_t MG_joystick_button(){
         }
     }
 
-    lastButtonState = GPIO_PIN_SET;
+    if(currentState == GPIO_PIN_SET) lastButtonState = GPIO_PIN_SET;
     return GPIO_PIN_SET;
 }

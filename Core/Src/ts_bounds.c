@@ -1,6 +1,9 @@
 #include "ts_bounds.h"
 #include "stm32_lcd.h"
 #include "display.h"
+#include "game.h"
+#include "legal_move.h"
+#include "stm32h7xx_it.h"
 
 button_play_ts_bounds buttonPlayTsBounds;
 button_restart_ts_bounds buttonRestartTsBounds;
@@ -73,5 +76,37 @@ void MG_TS_bounds_Init(){
     square22Bounds.YlowerBound = BOARD_TOP_LEFT_Y + 2 * SQUARE_SIZE;
     square22Bounds.YupperBound = BOARD_TOP_LEFT_Y + 3 * SQUARE_SIZE;
 
+
+}
+
+void MG_Playscreen_ts_board_bounds(){
+
+    if(field_or_button_pressed == 0) return;
+
+    field_or_button_pressed = 0;
+
+    if(!INBOUNDS(touch.TouchX, square00Bounds.XlowerBound, square02Bounds.XupperBound) 
+        || !INBOUNDS(touch.TouchY, square00Bounds.YlowerBound, square20Bounds.YupperBound)) return;
+    
+    if(touch.TouchX >= square02Bounds.XlowerBound){
+
+        if(touch.TouchY < square00Bounds.YupperBound) MG_empty_square(2,0);
+        else if(touch.TouchY < square10Bounds.YupperBound) MG_empty_square(2,1);
+        else MG_empty_square(2,2);
+        return;
+
+    }
+
+    if(touch.TouchX >= square01Bounds.XlowerBound){
+
+        if(touch.TouchY < square00Bounds.YupperBound) MG_empty_square(1,0);
+        else if(touch.TouchY < square10Bounds.YupperBound) MG_empty_square(1,1);
+        else MG_empty_square(1,2);
+        return;
+    }
+
+    if(touch.TouchY < square00Bounds.YupperBound) MG_empty_square(0,0);
+    else if(touch.TouchY < square10Bounds.YupperBound) MG_empty_square(0,1);
+    else MG_empty_square(0,2);
 
 }

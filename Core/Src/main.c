@@ -146,12 +146,24 @@ int main(void) {
     if (currScreen == HOMESCREEN){
 
       if(MG_Homescreen() == PLAY) currScreen = PLAYSCREEN;
-      else score[0] = 0; score[1] = 0;
+      else{ score[0] = 0; score[1] = 0;}
 
     }else{
 
       playerOnMove = iteration % 2;
       MG_Playscreen();
+
+      switch(gameStatus){
+
+        case PLAYER1_WIN:
+          score[0] += 1;
+          break;
+        
+        case PLAYER2_WIN:
+          score[1] += 1;
+          break;
+      }
+
       currScreen = HOMESCREEN;
     }
   }

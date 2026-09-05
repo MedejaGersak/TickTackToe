@@ -32,7 +32,6 @@ typedef struct{
 
 extern button_play_ts_bounds buttonPlayTsBounds;
 extern button_restart_ts_bounds buttonRestartTsBounds;
-void MG_TS_bounds_Init(void);
 
 extern square_bounds square00Bounds;
 extern square_bounds square01Bounds;
@@ -43,6 +42,9 @@ extern square_bounds square12Bounds;
 extern square_bounds square20Bounds;
 extern square_bounds square21Bounds;
 extern square_bounds square22Bounds;
+
+void MG_TS_bounds_Init(void);
+void MG_Playscreen_ts_board_bounds(void);
 
 
 #endif

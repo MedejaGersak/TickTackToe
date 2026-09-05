@@ -10,10 +10,10 @@
 // #include "stm32h750b_discovery_lcd.h"
 // #include "stm32h7xx_hal_ltdc.h"
 #include "stm32_lcd.h"
+#include "stm32h7xx_it.h"
 #include "ts_bounds.h"
 
-#define INBOUNDS(val, min, max) ((val) < (min) ? 0 : ((val) > (max) ? 0 : 1))
-
+enum Playscreen gameStatus;
 
 int score[] = {0,0};
 TS_State_t touch;
@@ -34,8 +34,6 @@ void MG_Board_Init(){
     board[2][2] = square22Bounds;
 }
 
-
-
 enum Homescreen MG_Homescreen(){
 
     MG_Backround_Homescreen();
@@ -46,7 +44,7 @@ enum Homescreen MG_Homescreen(){
     while(1){
 
         //touchscreen
-        if(touch.TouchDetected == 1){
+        if(field_or_button_pressed == 1){
 
             if(INBOUNDS(touch.TouchX, buttonPlayTsBounds.XlowerBound, buttonPlayTsBounds.XupperBound)
                && 
@@ -59,7 +57,7 @@ enum Homescreen MG_Homescreen(){
                 INBOUNDS(touch.TouchY, buttonRestartTsBounds.YlowerBound, buttonRestartTsBounds.YupperBound)) {
                 return RESTART;
             }
-
+            field_or_button_pressed = 0;
         }
 
         //joystick
@@ -81,28 +79,26 @@ enum Homescreen MG_Homescreen(){
         }
     }
 }
-
-
-
+int32_t x = 0, y = 0;
 
 void MG_Playscreen(){
 
     MG_Backround_Playscreen();
-    int32_t x = 0, y = 0; //board[y][x] !!!!!
+    gameStatus = ONGOING;
+    //board[y][x] !!!!!
     MG_Playscreen_SelectField(board[y][x].XlowerBound, board[y][x].YlowerBound);
 
     while(1){
 
         //toucscreen
-        if(touch.TouchDetected == 1){
-            //TODO posici v kateri kvadratek smo kliknili
-        }
-
+        MG_Playscreen_ts_board_bounds();
 
         //joystick:
         if((joystick_button = MG_joystick_button()) == GPIO_PIN_RESET){
             MG_empty_square(x, y);
         }
+
+        if(gameStatus != ONGOING) return;
 
         enum Move mx = MG_joystick_move();
 
@@ -142,11 +138,5 @@ void MG_Playscreen(){
 
             default:
         }
-
-
-
-
     }
-
-
 }

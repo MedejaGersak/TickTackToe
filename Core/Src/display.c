@@ -10,9 +10,23 @@
 #include <stdio.h>
 #include <stdio.h>
 
+#define TEXT_PLAYER1_X 40
+#define TEXT_PLAYER1_Y 30
+#define TEXT_PALYER1_SIZE &Font16
+#define TEXT_PALYER1_COLOR LCD_COLOR_ARGB8888_LIGHTGRAY
+#define PLAYER1_SCORE_X ((*TEXT_PALYER1_SIZE).Width * 13)
+
+
+#define TEXT_PLAYER2_X 40
+#define TEXT_PLAYER2_Y 80
+#define TEXT_PALYER2_SIZE &Font16
+#define TEXT_PALYER2_COLOR LCD_COLOR_ARGB8888_LIGHTGRAY
+#define PLAYER2_SCORE_X ((*TEXT_PALYER2_SIZE).Width * 13)
+
 
 #define TRANSPARENT 0x00000000UL
 #define CIRCLE_AND_X_MARGIN 20
+#define PLAYBOARD_COLOR LCD_COLOR_ARGB8888_RED
 
 //celoten display: 480 x 272
 int BACKGROUND_LAYER = 0;
@@ -98,8 +112,8 @@ void MG_Backround_Homescreen() {
   if (BSP_LCD_SetActiveLayer(0, FIRST_LAYER) != BSP_ERROR_NONE) {
       Error_Handler();
   }
-
   UTIL_LCD_Clear(0x00000000UL);
+
   UTIL_LCD_SetTextColor(BUTTON_PLAY_COLOR);
   UTIL_LCD_SetFont(BUTTON_PLAY_SIZE);
   UTIL_LCD_DisplayStringAt(BUTTON_PLAY_X, BUTTON_PLAY_Y, (uint8_t*) "PLAY", LEFT_MODE);//margin 10
@@ -107,12 +121,19 @@ void MG_Backround_Homescreen() {
   UTIL_LCD_SetTextColor(BUTTON_RESTART_COLOR);
   UTIL_LCD_SetFont(BUTTON_RESTART_SIZE);
   UTIL_LCD_DisplayStringAt(BUTTON_RESTART_X, BUTTON_RESTART_Y, (uint8_t*) "RESTART", LEFT_MODE); //Xpos = (460/4)*2
-  UTIL_LCD_DisplayStringAt(40, 30, (uint8_t*) "PLAYER 1:", LEFT_MODE);
-  UTIL_LCD_DisplayStringAt(270,30, (uint8_t*) "PLAYER 2:", LEFT_MODE);
 
-  unsigned char buff[20];
-  snprintf(buff, sizeof(buff), "%d", score[0]);
-  UTIL_LCD_DisplayStringAt(410,30,   (uint8_t*) &buff, LEFT_MODE);
+  UTIL_LCD_SetTextColor(TEXT_PALYER1_COLOR);
+  UTIL_LCD_SetFont(TEXT_PALYER1_SIZE);
+  UTIL_LCD_DisplayStringAt(TEXT_PLAYER1_X, TEXT_PLAYER1_Y, (uint8_t*) "PLAYER 1:", LEFT_MODE);
+  UTIL_LCD_DisplayStringAt(TEXT_PLAYER2_X,TEXT_PLAYER2_Y, (uint8_t*) "PLAYER 2:", LEFT_MODE);
+
+  unsigned char buff0[20];
+  unsigned char buff1[20];
+  snprintf(buff0, sizeof(buff0), "%d", score[0]);
+  snprintf(buff1, sizeof(buff1), "%d", score[1]);
+  UTIL_LCD_DisplayStringAt(PLAYER1_SCORE_X, TEXT_PLAYER1_Y,   (uint8_t*) &buff0, LEFT_MODE);
+  UTIL_LCD_DisplayStringAt(PLAYER2_SCORE_X,TEXT_PLAYER2_Y,   (uint8_t*) &buff1, LEFT_MODE);
+
 
 }
 
@@ -120,22 +141,21 @@ void MG_Backround_Homescreen() {
 
 void MG_Backround_Playscreen() {
 
-  if (BSP_LCD_SetActiveLayer(0, FIRST_LAYER) != BSP_ERROR_NONE) {
-    Error_Handler();
-  }
-  UTIL_LCD_Clear(0x00000000UL);
-
 
   if (BSP_LCD_SetActiveLayer(0, BACKGROUND_LAYER) != BSP_ERROR_NONE) {
     Error_Handler();
   }
 
   UTIL_LCD_Clear(LCD_COLOR_ARGB8888_BLACK);
-  UTIL_LCD_FillRect(BOARD_TOP_LEFT_X + SQUARE_SIZE, BOARD_TOP_LEFT_Y, LINE_THICKNESS, LINE_LENGTH, LCD_COLOR_ARGB8888_RED);
-  UTIL_LCD_FillRect(BOARD_TOP_LEFT_X + 2 * SQUARE_SIZE, BOARD_TOP_LEFT_Y, LINE_THICKNESS, LINE_LENGTH, LCD_COLOR_ARGB8888_RED);
-  UTIL_LCD_FillRect(BOARD_TOP_LEFT_X, BOARD_TOP_LEFT_Y + SQUARE_SIZE, LINE_LENGTH, LINE_THICKNESS, LCD_COLOR_ARGB8888_RED);
-  UTIL_LCD_FillRect(BOARD_TOP_LEFT_X, BOARD_TOP_LEFT_Y + 2 * SQUARE_SIZE, LINE_LENGTH, LINE_THICKNESS, LCD_COLOR_ARGB8888_RED);
+  UTIL_LCD_FillRect(BOARD_TOP_LEFT_X + SQUARE_SIZE, BOARD_TOP_LEFT_Y, LINE_THICKNESS, LINE_LENGTH, PLAYBOARD_COLOR);
+  UTIL_LCD_FillRect(BOARD_TOP_LEFT_X + 2 * SQUARE_SIZE, BOARD_TOP_LEFT_Y, LINE_THICKNESS, LINE_LENGTH, PLAYBOARD_COLOR);
+  UTIL_LCD_FillRect(BOARD_TOP_LEFT_X, BOARD_TOP_LEFT_Y + SQUARE_SIZE, LINE_LENGTH, LINE_THICKNESS, PLAYBOARD_COLOR);
+  UTIL_LCD_FillRect(BOARD_TOP_LEFT_X, BOARD_TOP_LEFT_Y + 2 * SQUARE_SIZE, LINE_LENGTH, LINE_THICKNESS, PLAYBOARD_COLOR);
 
+  if (BSP_LCD_SetActiveLayer(0, FIRST_LAYER) != BSP_ERROR_NONE) {
+    Error_Handler();
+  }
+  UTIL_LCD_Clear(0x00000000UL);
 
 }
 

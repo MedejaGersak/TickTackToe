@@ -47,7 +47,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-int lastTouch = 0;
+int lastTouchTime = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -210,23 +210,36 @@ void EXTI2_IRQHandler () {
     BSP_TS_IRQHandler(0);
 }
 
+// int lastTouchDetect;
+int field_or_button_pressed;
+
 
 void BSP_TS_Callback(uint32_t Instance) {
 
-    if(HAL_GetTick() - lastTouch < 225){
-      touch.TouchDetected = 0;
-      return;
-    } 
+    if(BSP_TS_GetState(0, &touch) != BSP_ERROR_NONE){
+      Error_Handler();
+    }
 
-  if(BSP_TS_GetState(0, &touch) != BSP_ERROR_NONE){
-    Error_Handler();
+  if(HAL_GetTick() - lastTouchTime < 225){
+    field_or_button_pressed = 0;
+    return;
   }
+
+  while(1){
+    if(BSP_TS_GetState(0, &touch) != BSP_ERROR_NONE){
+      Error_Handler();
+    }
+
+    if(touch.TouchDetected == 0) break;
+
+  }
+
   touch.TouchX = CLAMP((touch.TouchX * FT5336_MAX_X_LENGTH) / LCD_DEFAULT_WIDTH, 0, LCD_DEFAULT_WIDTH);
   touch.TouchY = CLAMP((touch.TouchY * FT5336_MAX_Y_LENGTH) / LCD_DEFAULT_HEIGHT, 0, LCD_DEFAULT_HEIGHT);
+  field_or_button_pressed = 1;
   
-  lastTouch = HAL_GetTick();
+  lastTouchTime = HAL_GetTick();
   
-
 }
 
 /* USER CODE END 1 */

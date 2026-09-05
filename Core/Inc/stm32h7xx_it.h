@@ -57,6 +57,8 @@ void PendSV_Handler(void);
 void SysTick_Handler(void);
 /* USER CODE BEGIN EFP */
 
+extern int field_or_button_pressed;
+
 /* USER CODE END EFP */
 
 #ifdef __cplusplus
