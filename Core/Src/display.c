@@ -9,7 +9,8 @@
 #include <stdint.h>
 #include "game.h"
 #include <stdio.h>
-#include <stdio.h>
+#include <math.h>
+#include "rotate.h"
 
 #define TEXT_PLAYER1_X 40
 #define TEXT_PLAYER1_Y 30
@@ -44,6 +45,8 @@
 //celoten display: 480 x 272
 int BACKGROUND_LAYER = 0;
 int FIRST_LAYER = 1;
+
+Point_t arrayOfPoints[8];
 
 
 void MG_Display_Init() {
@@ -114,6 +117,67 @@ void MG_Display_Init() {
 }
 
 
+
+
+void MG_DrawBacksplashRotate(int32_t topLeft_X, int32_t topLeft_Y, int32_t squareSize, int32_t lineLength, float angle, uint32_t color){
+
+  arrayOfPoints[0].x = topLeft_X;
+  arrayOfPoints[0].y = topLeft_Y;
+  arrayOfPoints[1].x = topLeft_X;
+  arrayOfPoints[1].y = topLeft_Y + lineLength;
+  arrayOfPoints[2].x = topLeft_X + squareSize;
+  arrayOfPoints[2].y = topLeft_Y;
+  arrayOfPoints[3].x = topLeft_X + squareSize;
+  arrayOfPoints[3].y = topLeft_Y + lineLength;
+  arrayOfPoints[4].x = topLeft_X - squareSize;
+  arrayOfPoints[4].y = topLeft_Y + squareSize;
+  arrayOfPoints[5].x = topLeft_X - squareSize + lineLength;
+  arrayOfPoints[5].y = topLeft_Y + squareSize;
+  arrayOfPoints[6].x = topLeft_X - squareSize;
+  arrayOfPoints[6].y = topLeft_Y + 2 * squareSize;
+  arrayOfPoints[7].x = topLeft_X - squareSize + lineLength;
+  arrayOfPoints[7].y = topLeft_Y + 2 * squareSize;
+
+  int32_t pivotX = (arrayOfPoints[4].x + arrayOfPoints[5].x) / 2;
+  int32_t pivotY = (arrayOfPoints[0].y + arrayOfPoints[1].y) /2;
+
+  // for(int i = 0; i < 8; i++){
+
+  //   Point_t newPoint = rotate(arrayOfPoints[i].x, arrayOfPoints[i].y, pivotX, pivotY, angle);
+
+  //   arrayOfPoints[i].x = newPoint.x;
+  //   arrayOfPoints[i].y = newPoint.y;
+  // }
+
+  UTIL_LCD_DrawLine(arrayOfPoints[0].x, arrayOfPoints[0].y, arrayOfPoints[1].x, arrayOfPoints[1].y, color);
+  UTIL_LCD_DrawLine(arrayOfPoints[2].x, arrayOfPoints[2].y, arrayOfPoints[3].x, arrayOfPoints[3].y, color);
+  UTIL_LCD_DrawLine(arrayOfPoints[4].x, arrayOfPoints[4].y, arrayOfPoints[5].x, arrayOfPoints[5].y, color);
+  UTIL_LCD_DrawLine(arrayOfPoints[6].x, arrayOfPoints[6].y, arrayOfPoints[7].x, arrayOfPoints[7].y, color);
+
+
+}
+
+#define X_BACKSPLASH_MARGIN 5
+
+void MG_DrawXBacksplash(int32_t topLeft_X, int32_t topLeft_Y, int32_t squareSize, float angle, uint32_t color){
+
+  arrayOfPoints[0].x = topLeft_X + X_BACKSPLASH_MARGIN;
+  arrayOfPoints[0].y = topLeft_Y + X_BACKSPLASH_MARGIN;
+  arrayOfPoints[1].x = topLeft_X + squareSize - X_BACKSPLASH_MARGIN;
+  arrayOfPoints[1].y = topLeft_Y + squareSize - X_BACKSPLASH_MARGIN;
+  arrayOfPoints[2].x = topLeft_X + X_BACKSPLASH_MARGIN;
+  arrayOfPoints[2].y = topLeft_Y + squareSize - X_BACKSPLASH_MARGIN;
+  arrayOfPoints[3].x = topLeft_X + squareSize - X_BACKSPLASH_MARGIN;
+  arrayOfPoints[3].y = topLeft_Y + X_BACKSPLASH_MARGIN;
+
+  UTIL_LCD_DrawLine(arrayOfPoints[0].x, arrayOfPoints[0].y, arrayOfPoints[1].x, arrayOfPoints[1].y, color);
+  UTIL_LCD_DrawLine(arrayOfPoints[2].x, arrayOfPoints[2].y, arrayOfPoints[3].x, arrayOfPoints[3].y, color);
+
+
+  
+}
+
+
 void MG_Backround_Homescreen() {
 
   if (BSP_LCD_SetActiveLayer(0, BACKGROUND_LAYER) != BSP_ERROR_NONE) {
@@ -121,6 +185,15 @@ void MG_Backround_Homescreen() {
   }
 
   UTIL_LCD_Clear(HOMESCREEN_BACKGROUND_COLOR);
+
+  MG_DrawBacksplashRotate(380, 35, 25, 25*3, M_PI / 4, PLAYER1_COLOR);
+  MG_DrawBacksplashRotate(100, 130, 40, 40*3, M_PI/6, PLAYER0_COLOR);
+  MG_DrawBacksplashRotate(240, 60, 25, 25*3, (5 * M_PI) / 6,PLAYBOARD_COLOR);
+
+
+
+
+  MG_DrawXBacksplash( 100, 130 + 2 * 40, 40, (5 * M_PI) / 6, PLAYER0_COLOR);
 
 
   if (BSP_LCD_SetActiveLayer(0, FIRST_LAYER) != BSP_ERROR_NONE) {
@@ -359,29 +432,8 @@ void MG_End_of_game_screen(int32_t x1, int32_t y1, int32_t x2, int32_t y2){
     HAL_Delay(800);
   }
 
-
-
-  // char player1_win[] = "PLAYER1 WINS";
-  // char player2_win[] = "PLAYER2 WINS";
-  // char draw[] = "DRAW";
-
-  // uint8_t* p;
-
-  // if(gameStatus == PLAYER1_WIN) p = (uint8_t*)player1_win;
-  // else if(gameStatus == PLAYER2_WIN) p = (uint8_t*)player2_win;
-  // else p = (uint8_t*)draw;
-
-  // UTIL_LCD_Clear(0x00000000UL);
-
-  // UTIL_LCD_SetTextColor(BUTTON_RESTART_COLOR);
-  // UTIL_LCD_SetFont(&Font24);
-  // UTIL_LCD_DisplayStringAt(240, 136, p, LEFT_MODE);
-
-  
-
-
-
-
 }
+
+
 
 

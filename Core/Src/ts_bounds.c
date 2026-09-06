@@ -21,13 +21,14 @@ square_bounds square22Bounds;
 
 void MG_TS_bounds_Init(){
 
-    buttonPlayTsBounds.XlowerBound = BUTTON_PLAY_X;
-    buttonPlayTsBounds.XupperBound = BUTTON_PLAY_X + 4 * Font24.Width;
+
+    buttonPlayTsBounds.XlowerBound = 480 - BUTTON_PLAY_X - 4 * Font24.Width;
+    buttonPlayTsBounds.XupperBound = 480 - BUTTON_PLAY_X;
     buttonPlayTsBounds.YlowerBound = BUTTON_PLAY_Y;
     buttonPlayTsBounds.YupperBound = BUTTON_PLAY_Y + Font24.Height;
 
-    buttonRestartTsBounds.XlowerBound = BUTTON_RESTART_X;
-    buttonRestartTsBounds.XupperBound = BUTTON_RESTART_X + 7 * Font20.Width;
+    buttonRestartTsBounds.XlowerBound = 480 - BUTTON_RESTART_X - 7 * Font20.Width;
+    buttonRestartTsBounds.XupperBound = 480 - BUTTON_RESTART_X ;
     buttonRestartTsBounds.YlowerBound = BUTTON_RESTART_Y;
     buttonRestartTsBounds.YupperBound = BUTTON_RESTART_Y + Font20.Height;
 
