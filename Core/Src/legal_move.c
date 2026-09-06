@@ -95,30 +95,6 @@ void MG_empty_square(int32_t x, int32_t y){
         Ypos2 = board[0][2].YlowerBound;
     }
 
-    //------
-
-    /*
-    for(int i = 0; i < 4; i++){
-
-        if(i != 3 && liveBoard[i][3] == 3) gameStatus = PLAYER1_WIN;
-        else if(i != 3 && liveBoard[i][3] == 15) gameStatus = PLAYER2_WIN;
-
-        if(i == 3){
-            for(int j = 0; j < 3; j++){
-                if(liveBoard[i][j] == 3) gameStatus = PLAYER1_WIN;
-                else if(liveBoard[i][j] == 15) gameStatus = PLAYER2_WIN;
-            }
-        }
-    }
-
-    if(diagonala_00_22 == 3) gameStatus = PLAYER1_WIN;
-    else if(diagonala_00_22 == 15) gameStatus = PLAYER2_WIN;
-
-    if(diagonala_02_20 == 3) gameStatus = PLAYER1_WIN;
-    else if(diagonala_02_20 == 15) gameStatus = PLAYER2_WIN;
-
-    */
-
     if(squaresFilled == 9 && gameStatus == ONGOING) gameStatus = DRAW;
 
     if(gameStatus != ONGOING){

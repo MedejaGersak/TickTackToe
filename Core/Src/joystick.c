@@ -20,7 +20,7 @@ uint32_t lastJoystickMove = 0;
 
 enum Move MG_joystick_move(){
 
-    if(HAL_GetTick() - lastJoystickMove < 225) return NEUTRAL;
+    if(HAL_GetTick() - lastJoystickMove < 210) return NEUTRAL;
 
     lastJoystickMove = HAL_GetTick();
 

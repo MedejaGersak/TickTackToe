@@ -27,11 +27,19 @@
 
 #define TRANSPARENT 0x00000000UL
 #define CIRCLE_AND_X_MARGIN 20
-#define PLAYBOARD_COLOR LCD_COLOR_ARGB8888_RED
+#define PLAYBOARD_COLOR LCD_COLOR_ARGB8888_LIGHTRED
 
 #define SYMBOL_X 420
 #define SYMBOL_Y 20
 #define SYMBOL_DIFF 30
+
+#define HOMESCREEN_BACKGROUND_COLOR LCD_COLOR_ARGB8888_BLACK
+#define SELECT_SQUARE_COLOR LCD_COLOR_ARGB8888_WHITE
+#define SELECT_BUTTON_PLAY_COLOR LCD_COLOR_ARGB8888_LIGHTRED
+#define SELECT_BUTTON_RESTART_COLOR LCD_COLOR_ARGB8888_LIGHTRED
+#define DRAW_COLOR LCD_COLOR_ARGB8888_LIGHTRED
+
+
 
 //celoten display: 480 x 272
 int BACKGROUND_LAYER = 0;
@@ -105,19 +113,20 @@ void MG_Display_Init() {
   }
 }
 
+
 void MG_Backround_Homescreen() {
 
   if (BSP_LCD_SetActiveLayer(0, BACKGROUND_LAYER) != BSP_ERROR_NONE) {
       Error_Handler();
   }
 
-  UTIL_LCD_Clear(LCD_COLOR_ARGB8888_BLACK);
+  UTIL_LCD_Clear(HOMESCREEN_BACKGROUND_COLOR);
 
 
   if (BSP_LCD_SetActiveLayer(0, FIRST_LAYER) != BSP_ERROR_NONE) {
       Error_Handler();
   }
-  UTIL_LCD_Clear(0x00000000UL);
+  UTIL_LCD_Clear(TRANSPARENT);
 
   UTIL_LCD_SetTextColor(BUTTON_PLAY_COLOR);
   UTIL_LCD_SetFont(BUTTON_PLAY_SIZE);
@@ -170,7 +179,7 @@ void MG_Backround_Playscreen() {
     Error_Handler();
   }
 
-  UTIL_LCD_Clear(LCD_COLOR_ARGB8888_BLACK);
+  UTIL_LCD_Clear(HOMESCREEN_BACKGROUND_COLOR);
   UTIL_LCD_FillRect(BOARD_TOP_LEFT_X + SQUARE_SIZE, BOARD_TOP_LEFT_Y, LINE_THICKNESS, LINE_LENGTH, PLAYBOARD_COLOR);
   UTIL_LCD_FillRect(BOARD_TOP_LEFT_X + 2 * SQUARE_SIZE, BOARD_TOP_LEFT_Y, LINE_THICKNESS, LINE_LENGTH, PLAYBOARD_COLOR);
   UTIL_LCD_FillRect(BOARD_TOP_LEFT_X, BOARD_TOP_LEFT_Y + SQUARE_SIZE, LINE_LENGTH, LINE_THICKNESS, PLAYBOARD_COLOR);
@@ -179,11 +188,10 @@ void MG_Backround_Playscreen() {
   if (BSP_LCD_SetActiveLayer(0, FIRST_LAYER) != BSP_ERROR_NONE) {
     Error_Handler();
   }
-  UTIL_LCD_Clear(0x00000000UL);
+  UTIL_LCD_Clear(TRANSPARENT);
 
   MG_DrawPlayerOnMoveSymbol();
 }
-
 
 
 void MG_DrawPlayerOnMoveSymbol(){
@@ -205,7 +213,7 @@ void MG_Playscreen_SelectField(uint32_t x, uint32_t y){
     Error_Handler();
   }
 
-  UTIL_LCD_DrawRect( x + 1, y + 1, SQUARE_SIZE - 1, SQUARE_SIZE - 1, LCD_COLOR_ARGB8888_WHITE);
+  UTIL_LCD_DrawRect( x + 1, y + 1, SQUARE_SIZE - 1, SQUARE_SIZE - 1, SELECT_SQUARE_COLOR);
 }
 
 void MG_Playscreen_UnselectField(uint32_t x, uint32_t y){
@@ -226,7 +234,7 @@ void MG_Homescreen_SelectPlayButton(){
   // UTIL_LCD_DisplayStringAt(BUTTON_RESTART_X, BUTTON_RESTART_Y, (uint8_t*)"RESTART", LEFT_MODE);
 
 
-  UTIL_LCD_SetTextColor(LCD_COLOR_ARGB8888_ORANGE);
+  UTIL_LCD_SetTextColor(SELECT_BUTTON_PLAY_COLOR);
   UTIL_LCD_SetFont(&Font24);
   UTIL_LCD_DisplayStringAt(BUTTON_PLAY_X, BUTTON_PLAY_Y, (uint8_t*)"PLAY", BUTTON_PLAY_MODE);
 
@@ -250,7 +258,7 @@ void MG_Homescreen_SelectRestartButton(){
   UTIL_LCD_ClearStringLine(BUTTON_RESTART_Y / Font16.Height);
   UTIL_LCD_ClearStringLine(BUTTON_RESTART_Y / Font16.Height + 1);
 
-  UTIL_LCD_SetTextColor(LCD_COLOR_ARGB8888_ORANGE);
+  UTIL_LCD_SetTextColor(SELECT_BUTTON_RESTART_COLOR);
   UTIL_LCD_SetFont(&Font20);
   UTIL_LCD_DisplayStringAt(BUTTON_RESTART_X, BUTTON_RESTART_Y, (uint8_t*)"RESTART", BUTTON_RESTART_MODE);
 
@@ -320,7 +328,7 @@ void MG_End_of_game_screen(int32_t x1, int32_t y1, int32_t x2, int32_t y2){
     if (BSP_LCD_SetActiveLayer(0, BACKGROUND_LAYER) != BSP_ERROR_NONE) {
       Error_Handler();
     }
-    UTIL_LCD_DrawHLine(0, i, 480, LCD_COLOR_ARGB8888_BLACK);
+    UTIL_LCD_DrawHLine(0, i, 480, HOMESCREEN_BACKGROUND_COLOR);
 
     if (BSP_LCD_SetActiveLayer(0, FIRST_LAYER) != BSP_ERROR_NONE) {
       Error_Handler();
@@ -335,7 +343,7 @@ void MG_End_of_game_screen(int32_t x1, int32_t y1, int32_t x2, int32_t y2){
       Error_Handler();
     }
 
-    UTIL_LCD_SetTextColor(LCD_COLOR_ARGB8888_RED);
+    UTIL_LCD_SetTextColor(DRAW_COLOR);
     UTIL_LCD_SetFont(&Font24);
 
     UTIL_LCD_DisplayStringAt(0, 136, (uint8_t*)"DRAW", CENTER_MODE);
