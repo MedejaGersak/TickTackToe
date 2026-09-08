@@ -74,10 +74,6 @@ static void MPU_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-//----------------
-int button;
-int temp = 0;
-//-----------------
 
 enum Screen {
   HOMESCREEN,
@@ -142,7 +138,13 @@ int main(void) {
   MG_Board_Init();
   int iteration = 0;
 
-  while(1){
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1) {
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
 
     if (currScreen == HOMESCREEN){
 
@@ -170,25 +172,7 @@ int main(void) {
 
       currScreen = HOMESCREEN;
     }
-  }
-
-
-
   
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1) {
-    /* USER CODE END WHILE */
-
-    //-------------------------------------------------
-    
-    //---------------------------------------------------
-    /* USER CODE BEGIN 3 */
-    
-    //MG_joystick_move();
-    HAL_Delay(500);
-    //UTIL_LCD_Clear(0x00000000UL);
 
 
     /* USER CODE END 3 */

@@ -40,6 +40,9 @@
 #define SELECT_BUTTON_RESTART_COLOR LCD_COLOR_ARGB8888_LIGHTRED
 #define DRAW_COLOR LCD_COLOR_ARGB8888_LIGHTRED
 
+#define X_SMALL_BACKSPLASH_MARGIN 5
+#define X_BIG_BACKSPLASH_MARGIN 8
+
 
 
 //celoten display: 480 x 272
@@ -119,7 +122,7 @@ void MG_Display_Init() {
 
 
 
-void MG_DrawBacksplashRotate(int32_t topLeft_X, int32_t topLeft_Y, int32_t squareSize, int32_t lineLength, float angle, uint32_t color){
+Point_t MG_DrawBacksplashRotate(int32_t topLeft_X, int32_t topLeft_Y, int32_t squareSize, int32_t lineLength, float angle, uint32_t color){
 
   arrayOfPoints[0].x = topLeft_X;
   arrayOfPoints[0].y = topLeft_Y;
@@ -139,43 +142,59 @@ void MG_DrawBacksplashRotate(int32_t topLeft_X, int32_t topLeft_Y, int32_t squar
   arrayOfPoints[7].y = topLeft_Y + 2 * squareSize;
 
   int32_t pivotX = (arrayOfPoints[4].x + arrayOfPoints[5].x) / 2;
-  int32_t pivotY = (arrayOfPoints[0].y + arrayOfPoints[1].y) /2;
+  int32_t pivotY = (arrayOfPoints[0].y + arrayOfPoints[1].y) / 2;
 
-  // for(int i = 0; i < 8; i++){
+  for(int i = 0; i < 8; i++){
 
-  //   Point_t newPoint = rotate(arrayOfPoints[i].x, arrayOfPoints[i].y, pivotX, pivotY, angle);
+    Point_t newPoint = rotate(arrayOfPoints[i].x, arrayOfPoints[i].y, pivotX, pivotY, angle);
 
-  //   arrayOfPoints[i].x = newPoint.x;
-  //   arrayOfPoints[i].y = newPoint.y;
-  // }
+    arrayOfPoints[i].x = newPoint.x;
+    arrayOfPoints[i].y = newPoint.y;
+  }
 
   UTIL_LCD_DrawLine(arrayOfPoints[0].x, arrayOfPoints[0].y, arrayOfPoints[1].x, arrayOfPoints[1].y, color);
   UTIL_LCD_DrawLine(arrayOfPoints[2].x, arrayOfPoints[2].y, arrayOfPoints[3].x, arrayOfPoints[3].y, color);
   UTIL_LCD_DrawLine(arrayOfPoints[4].x, arrayOfPoints[4].y, arrayOfPoints[5].x, arrayOfPoints[5].y, color);
   UTIL_LCD_DrawLine(arrayOfPoints[6].x, arrayOfPoints[6].y, arrayOfPoints[7].x, arrayOfPoints[7].y, color);
 
+  Point_t pivot = { pivotX, pivotY};
+
+  return pivot;
 
 }
 
-#define X_BACKSPLASH_MARGIN 5
 
-void MG_DrawXBacksplash(int32_t topLeft_X, int32_t topLeft_Y, int32_t squareSize, float angle, uint32_t color){
+void MG_DrawXBacksplash(int32_t topLeft_X, int32_t topLeft_Y, int32_t squareSize, int32_t margin, float angle, Point_t pivot, uint32_t color){
 
-  arrayOfPoints[0].x = topLeft_X + X_BACKSPLASH_MARGIN;
-  arrayOfPoints[0].y = topLeft_Y + X_BACKSPLASH_MARGIN;
-  arrayOfPoints[1].x = topLeft_X + squareSize - X_BACKSPLASH_MARGIN;
-  arrayOfPoints[1].y = topLeft_Y + squareSize - X_BACKSPLASH_MARGIN;
-  arrayOfPoints[2].x = topLeft_X + X_BACKSPLASH_MARGIN;
-  arrayOfPoints[2].y = topLeft_Y + squareSize - X_BACKSPLASH_MARGIN;
-  arrayOfPoints[3].x = topLeft_X + squareSize - X_BACKSPLASH_MARGIN;
-  arrayOfPoints[3].y = topLeft_Y + X_BACKSPLASH_MARGIN;
+  arrayOfPoints[0].x = topLeft_X + margin;
+  arrayOfPoints[0].y = topLeft_Y + margin;
+  arrayOfPoints[1].x = topLeft_X + squareSize - margin;
+  arrayOfPoints[1].y = topLeft_Y + squareSize - margin;
+  arrayOfPoints[2].x = topLeft_X + margin;
+  arrayOfPoints[2].y = topLeft_Y + squareSize - margin;
+  arrayOfPoints[3].x = topLeft_X + squareSize - margin;
+  arrayOfPoints[3].y = topLeft_Y + margin;
+
+  for(int i = 0; i < 4; i++){
+
+    Point_t newPoint = rotate(arrayOfPoints[i].x, arrayOfPoints[i].y, pivot.x, pivot.y, angle);
+
+    arrayOfPoints[i].x = newPoint.x;
+    arrayOfPoints[i].y = newPoint.y;
+  }
 
   UTIL_LCD_DrawLine(arrayOfPoints[0].x, arrayOfPoints[0].y, arrayOfPoints[1].x, arrayOfPoints[1].y, color);
   UTIL_LCD_DrawLine(arrayOfPoints[2].x, arrayOfPoints[2].y, arrayOfPoints[3].x, arrayOfPoints[3].y, color);
 
-
-  
 }
+
+void MG_DrawOBacksplash(int32_t Xpos,int32_t Ypos, int32_t radius, Point_t pivot, float angle, uint32_t color){
+
+  Point_t newPoint = rotate(Xpos, Ypos, pivot.x, pivot.y, angle);
+
+  UTIL_LCD_DrawCircle(newPoint.x, newPoint.y, radius, color);
+}
+
 
 
 void MG_Backround_Homescreen() {
@@ -186,14 +205,48 @@ void MG_Backround_Homescreen() {
 
   UTIL_LCD_Clear(HOMESCREEN_BACKGROUND_COLOR);
 
-  MG_DrawBacksplashRotate(380, 35, 25, 25*3, M_PI / 4, PLAYER1_COLOR);
-  MG_DrawBacksplashRotate(100, 130, 40, 40*3, M_PI/6, PLAYER0_COLOR);
-  MG_DrawBacksplashRotate(240, 60, 25, 25*3, (5 * M_PI) / 6,PLAYBOARD_COLOR);
+  Point_t pivot;
+  int32_t topLeftX = 380;
+  int32_t topLeftY = 35;
+  int32_t squareSize = 25;
+  int32_t lineLength = squareSize * 3;
+  int32_t halfSquareSize = squareSize / 2;
+  float angle = M_PI / 4;
+  pivot = MG_DrawBacksplashRotate(topLeftX, topLeftY, squareSize, lineLength, angle, PLAYER1_COLOR);
+  MG_DrawXBacksplash(topLeftX - squareSize, topLeftY , squareSize, X_SMALL_BACKSPLASH_MARGIN, angle, pivot, PLAYER0_COLOR);
+  MG_DrawXBacksplash(topLeftX + squareSize, topLeftY , squareSize, X_SMALL_BACKSPLASH_MARGIN, angle, pivot, PLAYER0_COLOR);
+  MG_DrawOBacksplash(topLeftX + halfSquareSize ,topLeftY + squareSize + halfSquareSize, halfSquareSize - X_SMALL_BACKSPLASH_MARGIN, pivot, angle, PLAYER1_COLOR);
+  MG_DrawOBacksplash(topLeftX - halfSquareSize ,topLeftY + 2 * squareSize + halfSquareSize, halfSquareSize - X_SMALL_BACKSPLASH_MARGIN, pivot, angle, PLAYER1_COLOR);
+  // MG_DrawXBacksplash(topLeftX, topLeftY + 2 * squareSize , squareSize, X_SMALL_BACKSPLASH_MARGIN, angle, pivot, PLAYER0_COLOR);
+
+
+  topLeftX = 100;
+  topLeftY = 130;
+  squareSize = 40;
+  lineLength = squareSize * 3;
+  halfSquareSize = squareSize / 2;
+  angle = (4 * M_PI)/6;
+  pivot = MG_DrawBacksplashRotate(topLeftX, topLeftY, squareSize, lineLength, angle, PLAYER0_COLOR);
+  // MG_DrawXBacksplash( topLeftX - squareSize + halfSquareSize, topLeftY - squareSize, squareSize,X_BIG_BACKSPLASH_MARGIN, angle, pivot, PLAYER0_COLOR);
+  MG_DrawOBacksplash((topLeftX - halfSquareSize), topLeftY + squareSize + halfSquareSize, halfSquareSize - X_BIG_BACKSPLASH_MARGIN, pivot, angle, PLAYER1_COLOR);
+  MG_DrawXBacksplash(topLeftX + squareSize, topLeftY + squareSize, squareSize, X_BIG_BACKSPLASH_MARGIN, angle, pivot, PLAYER0_COLOR);
+  // MG_DrawOBacksplash(topLeftX + squareSize + halfSquareSize, topLeftY + squareSize + halfSquareSize, halfSquareSize - X_BIG_BACKSPLASH_MARGIN, pivot, angle, PLAYER1_COLOR);
+  MG_DrawOBacksplash(topLeftX + halfSquareSize, topLeftY + 2 * squareSize + halfSquareSize, halfSquareSize - X_BIG_BACKSPLASH_MARGIN, pivot, angle, PLAYER1_COLOR);
 
 
 
-
-  MG_DrawXBacksplash( 100, 130 + 2 * 40, 40, (5 * M_PI) / 6, PLAYER0_COLOR);
+  topLeftX = 240;
+  topLeftY = 60;
+  squareSize = 25;
+  lineLength = squareSize * 3;
+  halfSquareSize = squareSize / 2;
+  angle = (5 * M_PI) / 6;
+  pivot = MG_DrawBacksplashRotate(topLeftX, topLeftY, squareSize, lineLength, angle,PLAYBOARD_COLOR);
+  // MG_DrawXBacksplash(topLeftX + squareSize, topLeftY, squareSize, X_SMALL_BACKSPLASH_MARGIN, angle, pivot, PLAYER0_COLOR);
+  // MG_DrawXBacksplash(topLeftX, topLeftY + squareSize, squareSize, X_SMALL_BACKSPLASH_MARGIN, angle, pivot, PLAYER0_COLOR);
+  MG_DrawXBacksplash(topLeftX - squareSize, topLeftY + 2 * squareSize, squareSize, X_SMALL_BACKSPLASH_MARGIN, angle, pivot, PLAYER0_COLOR);
+  MG_DrawOBacksplash(topLeftX - halfSquareSize, topLeftY + halfSquareSize, halfSquareSize - X_SMALL_BACKSPLASH_MARGIN, pivot, angle, PLAYER1_COLOR);
+  MG_DrawOBacksplash(topLeftX + squareSize + halfSquareSize, topLeftY + squareSize + halfSquareSize, halfSquareSize - X_SMALL_BACKSPLASH_MARGIN, pivot, angle, PLAYER1_COLOR);
 
 
   if (BSP_LCD_SetActiveLayer(0, FIRST_LAYER) != BSP_ERROR_NONE) {
@@ -230,7 +283,6 @@ void MG_Backround_Homescreen() {
 
   UTIL_LCD_SetTextColor(TEXT_PALYER2_COLOR);
   UTIL_LCD_DisplayStringAt(TEXT_PLAYER2_X + (*TEXT_PALYER2_SIZE).Width * 8, TEXT_PLAYER2_Y, (uint8_t*) ":", LEFT_MODE);
-
 
 
   char buff0[20];

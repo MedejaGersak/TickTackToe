@@ -9,7 +9,8 @@ GPIO_InitTypeDef pc0X = {0};
 GPIO_InitTypeDef pf8Y = {0};
 GPIO_InitTypeDef pg3Button = {0};
 
-
+// DMA1 (stream_0) ne more dostopati do DTCMRAM -> zato v linker skripti (`startup_stm32h750xx.s`)
+//  dolocimo `.dma_buffer` regijo in povemo da naj prevajalnik to postavi v RAM_D2 (ki ga DMA1 lahko doseze)
 __attribute__((section(".dma_buffer"), aligned(32)))
 volatile uint16_t joystick_buffer[2];
 volatile uint8_t joystick_button; //ko button ni pritisnjen je joystick_button = 1
@@ -33,7 +34,7 @@ void MG_adc_Init(void){
     hadc3.Init.ExternalTrigConv = ADC_SOFTWARE_START;
     hadc3.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
     hadc3.Init.ConversionDataManagement = ADC_CONVERSIONDATA_DMA_CIRCULAR;
-    hadc3.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN; //TODO
+    hadc3.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
     hadc3.Init.LeftBitShift = ADC_LEFTBITSHIFT_NONE;
     hadc3.Init.OversamplingMode = DISABLE;
     hadc3.Init.Oversampling.RightBitShift = DISABLE;
@@ -93,7 +94,6 @@ void MG_adc_Init(void){
    __HAL_LINKDMA(&hadc3, DMA_Handle, hdma1);
 
 
-   //TODO init PC0 PF8
    __HAL_RCC_GPIOC_CLK_ENABLE();
    __HAL_RCC_GPIOF_CLK_ENABLE();
    __HAL_RCC_GPIOG_CLK_ENABLE();
